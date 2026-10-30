@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Noto Sans Khmer", system-ui, sans-serif;
+  --font-display: "Playfair Display", "Noto Serif Khmer", Georgia, serif;
+
+  /* IISPP maroon (from the logo) */
+  --color-brand-50: #fbf5f3;
+  --color-brand-100: #f4e7e2;
+  --color-brand-200: #e7cdc5;
+  --color-brand-300: #d2a79a;
+  --color-brand-400: #b97768;
+  --color-brand-500: #9a4b40;
+  --color-brand-600: #82352e;
+  --color-brand-700: #6b211d;
+  --color-brand-800: #541714;
+  --color-brand-900: #3c100f;
+  --color-brand-950: #250a0a;
+
+  /* Seal red + gold accents */
+  --color-seal: #e8343a;
+  --color-gold-300: #d7c79a;
+  --color-gold-400: #c6b27a;
+  --color-gold-500: #b8a46e;
+}
+
+html { scroll-behavior: smooth; text-size-adjust: 100%; }
+body { min-width: 320px; font-family: var(--font-sans); color: #282321; background: #fff; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+button, input, textarea, select { font: inherit; }
+::selection { color: #fff; background: var(--color-brand-700); }
+:focus-visible { outline: 3px solid var(--color-gold-400); outline-offset: 2px; }
+
+.container-page { width: 100%; max-width: 76rem; margin-inline: auto; padding-inline: 1rem; }
+@media (min-width: 640px) { .container-page { padding-inline: 1.5rem; } }
+.prose-body { white-space: pre-line; line-height: 1.9; color: #3a3135; }
+.animate-fade-up { animation: fadeUp .5s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

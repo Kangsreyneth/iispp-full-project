@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // All file operations are mediated by the Laravel API.
+    match /{object=**} {
+      allow read, write: if false;
+    }
+  }
+}
