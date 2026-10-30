@@ -3,18 +3,28 @@ import { apiFetch, publicApiFetch } from "./api/apiService";
 let siteRecord = {};
 let locationRecord = {};
 
-const localized = (value) => typeof value === "string" ? value : value?.en || value?.km || "";
+const localized = (value, lang = "en") => typeof value === "string" ? value : value?.[lang] || value?.en || value?.km || "";
 const imageUrl = (value) => typeof value === "string" ? value : value?.url || "";
 
-function toFormSettings(site = {}, location = {}, publicView = false) {
+function toFormSettings(site = {}, location = {}, publicView = false, lang = "en") {
   const contact = site.contact || {};
   const social = site.socialLinks || {};
   const shownLocation = location.mapEnabled ? location : {};
   return {
     ...site,
+    heroTitle: localized(site.heroTitle, lang),
+    heroSubtitle: localized(site.heroSubtitle, lang),
     heroImage: imageUrl(site.heroImage),
+    aboutTitle: localized(site.aboutTitle, lang),
+    aboutText: localized(site.aboutText, lang),
     aboutImage: imageUrl(site.aboutImage),
-    address: localized(contact.address) || localized(location.address) || site.address || "",
+    background: localized(site.background, lang),
+    mission: localized(site.mission, lang),
+    vision: localized(site.vision, lang),
+    goals: localized(site.goals, lang),
+    admissionsText: localized(site.admissionsText, lang),
+    admissionsDeadline: localized(site.admissionsDeadline, lang),
+    address: localized(contact.address, lang) || localized(location.address, lang) || site.address || "",
     phone: contact.phone || site.phone || "",
     email: contact.email || site.email || "",
     facebook: social.facebook || site.facebook || "",
@@ -37,10 +47,10 @@ async function loadAdmin() {
 }
 
 export const settingsService = {
-  get: async () => {
+  get: async (lang = "en") => {
     const response = await publicApiFetch("/public/settings");
     const value = response?.data || {};
-    return toFormSettings(value.site, value.location, true);
+    return toFormSettings(value.site, value.location, true, lang);
   },
 
   getAdmin: loadAdmin,

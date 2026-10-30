@@ -11,6 +11,8 @@ import programService from "@/services/programService";
 import { byOrder } from "@/utils/format";
 import { LEVELS } from "@/utils/constants";
 
+const levelKeys = { Undergraduate: "undergraduate", Graduate: "graduate", "Short course": "shortCourse" };
+
 export default function Academics() {
   const { t } = useLang();
   const [params, setParams] = useSearchParams();
@@ -25,19 +27,19 @@ export default function Academics() {
 
   return (
     <>
-      <PageHeader title={t("academics")} subtitle="Explore undergraduate, graduate and short-course programs." crumbs={[[t("academics")]]} />
+      <PageHeader title={t("academics")} subtitle={t("academicsIntro")} crumbs={[[t("academics")]]} />
       <div className="container-page py-12">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">
-            <button className={chip(!level)} onClick={() => setParams({})}>All</button>
-            {LEVELS.map((l) => <button key={l} className={chip(level === l)} onClick={() => setParams({ level: l })}>{l}</button>)}
+            <button className={chip(!level)} onClick={() => setParams({})}>{t("all")}</button>
+            {LEVELS.map((l) => <button key={l} className={chip(level === l)} onClick={() => setParams({ level: l })}>{t(levelKeys[l])}</button>)}
           </div>
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter programs…" aria-label="Filter programs" className="w-full rounded-full border border-slate-300 py-2.5 pl-10 pr-4 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("filterPrograms")} aria-label={t("filterPrograms")} className="w-full rounded-full border border-slate-300 py-2.5 pl-10 pr-4 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-200" />
           </div>
         </div>
-        {loading ? <Spinner /> : shown.length === 0 ? <EmptyState title="No programs found" text="Try another filter." /> : (
+        {loading ? <Spinner /> : shown.length === 0 ? <EmptyState title={t("noProgramsFound")} text={t("tryAnotherFilter")} /> : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{shown.map((p) => <ProgramCard key={p.id} item={p} />)}</div>
         )}
       </div>

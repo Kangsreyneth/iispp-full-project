@@ -9,12 +9,12 @@ import { byOrder } from "@/utils/format";
 
 export default function Faculties() {
   const { t } = useLang();
-  const { data, loading } = useCollection(departmentService, { sort: byOrder });
+  const { data, loading, error } = useCollection(departmentService, { sort: byOrder });
   return (
     <>
-      <PageHeader title={t("faculty")} subtitle="Faculties and departments." crumbs={[[t("faculty")]]} />
+      <PageHeader title={t("departments")} subtitle={t("departmentsIntro")} crumbs={[[t("departments")]]} />
       <div className="container-page py-12">
-        {loading ? <Spinner /> : data.length === 0 ? <EmptyState title="No faculties yet" text="Add them in Dashboard → Faculties." /> : (
+        {loading ? <Spinner /> : error ? <EmptyState title={t("dataUnavailable")} text={t("tryAgainLater")} /> : data.length === 0 ? <EmptyState title={t("noDepartments")} /> : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{data.map((d) => <FacultyCard key={d.id} item={d} />)}</div>
         )}
       </div>

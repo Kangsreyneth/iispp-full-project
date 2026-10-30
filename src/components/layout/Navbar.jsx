@@ -6,120 +6,95 @@ import SearchDialog from "./SearchDialog";
 import { useLang } from "@/hooks/useLang";
 import { useCollection } from "@/hooks/useCollection";
 import departmentService from "@/services/departmentService";
-import { CENTERS, centerAnchor } from "@/config/centers";
+import { BRAND } from "@/utils/constants";
 
-const LINKS = [
-  ["/about", "About"],
-  ["/admissions", "Admissions"],
-  ["/research", "Research"],
-  ["/news", "News"],
-  ["/events", "Events"],
-  ["/contact", "Contact"],
-];
+const activeClass = "text-brand-700";
+const idleClass = "text-slate-700 hover:text-brand-700";
 
-const navClass = "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-brand-800";
-
-function DepartmentGroups({ departments, onNavigate }) {
+function MenuGroup({ label, children, active, mobile = false, onNavigate }) {
   return (
-    <div className="space-y-5">
-      <section aria-label="Departments">
-        <h2 className="border-b border-slate-200 pb-2 text-sm font-bold text-slate-900">Departments</h2>
-        <div className="mt-2 space-y-2">
-          {departments.length ? departments.map((department) => (
-            <Link key={department.id} to={`/faculty/${department.id}`} onClick={onNavigate} className={navClass + " bg-slate-100 px-4 py-3 text-slate-900 hover:bg-slate-200"}>
-              {department.name}
-            </Link>
-          )) : (
-            <Link to="/department" onClick={onNavigate} className={navClass + " bg-slate-100 px-4 py-3 text-slate-900 hover:bg-slate-200"}>
-              View departments
-            </Link>
-          )}
-        </div>
-      </section>
-      <section aria-label="Centers">
-        <h2 className="border-b border-slate-200 pb-2 text-sm font-bold text-slate-900">Centers</h2>
-        <div className="mt-2 space-y-2">
-          {CENTERS.map((center) => (
-            <Link key={center} to={`/centers#${centerAnchor(center)}`} onClick={onNavigate} className={navClass + " bg-slate-100 px-4 py-3 text-slate-900 hover:bg-slate-200"}>
-              {center}
-            </Link>
-          ))}
-        </div>
-      </section>
-    </div>
+    <details className={`group/menu relative ${mobile ? "border-b border-slate-200" : ""}`}>
+      <summary className={`flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 text-sm font-semibold transition marker:hidden ${active ? activeClass : idleClass} ${mobile ? "w-full" : ""}`}>
+        {label}<ChevronDown className="h-4 w-4 transition-transform group-open/menu:rotate-180" aria-hidden="true" />
+      </summary>
+      <div className={`${mobile ? "border-t border-slate-100 bg-[#f8f8f6] px-3 pb-2" : "absolute left-0 top-full z-50 min-w-64 border border-slate-200 bg-white px-2 py-2 shadow-lg"}`}>
+        {children.map(([to, text]) => (
+          <NavLink key={`${to}-${text}`} to={to} onClick={(event) => { onNavigate?.(); event.currentTarget.closest("details")?.removeAttribute("open"); }} className={({ isActive }) => `block border-b border-slate-100 px-3 py-3 text-sm last:border-b-0 ${isActive ? "font-semibold text-brand-700" : "text-slate-700 hover:bg-brand-50 hover:text-brand-700"}`}>
+            {text}
+          </NavLink>
+        ))}
+      </div>
+    </details>
   );
 }
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [departmentsOpen, setDepartmentsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
-  const { lang, toggle } = useLang();
+  const { lang, toggle, t } = useLang();
   const { data: departments } = useCollection(departmentService);
+  const closeMenu = () => setMenuOpen(false);
+  const isActive = (paths) => paths.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
 
-  const closeMenu = () => { setMenuOpen(false); setDepartmentsOpen(false); };
-  const linkClass = ({ isActive }) =>
-    `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? "bg-brand-50 text-brand-800" : "text-slate-600 hover:bg-slate-50 hover:text-brand-800"}`;
+  const groups = [
+    { key: "about", label: t("aboutIispp"), paths: ["/about"], children: [["/about", t("overview")]] },
+    { key: "academics", label: t("academics"), paths: ["/faculty", "/academics", "/department", "/program"], children: [["/faculty", t("faculty")], ["/academics", t("programs")], ...departments.slice(0, 5).map((d) => [`/faculty/${d.id}`, d.name])] },
+    { key: "research", label: t("research"), paths: ["/research", "/centers"], children: [["/research", t("research")], ["/centers", t("researchCenters")]] },
+    { key: "newsEvents", label: t("newsEvents"), paths: ["/news", "/events"], children: [["/news", t("news")], ["/events", t("events")]] },
+    { key: "students", label: t("students"), paths: ["/admissions"], children: [["/admissions", t("admissions")]] },
+  ];
+  const direct = [
+    { to: "/", label: t("home") },
+    { to: "/contact", label: t("contact") },
+  ];
 
+  const desktopLink = ({ isActive: current }) => `px-3 py-3 text-sm font-semibold transition-colors ${current ? activeClass : idleClass}`;
   return (
     <>
-      <div className="hidden bg-brand-900 text-white sm:block">
-        <div className="container-page flex h-9 items-center justify-between text-xs text-white/80">
-          <span>Institute for International Studies and Public Policy</span>
-          <span>Royal University of Phnom Penh · Cambodia</span>
-        </div>
-      </div>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm shadow-slate-900/[0.03] backdrop-blur">
-        <div className="container-page flex h-[72px] items-center justify-between gap-4">
-          <Link to="/" aria-label="IISPP home" onClick={closeMenu} className="shrink-0">
-            <img src={logo} alt="IISPP" className="h-10 w-auto sm:h-12" />
+      <header className="relative z-40 bg-white">
+        <div className="container-page flex min-h-[92px] items-center justify-between gap-4 py-3 sm:min-h-[104px]">
+          <Link to="/" aria-label="IISPP home" onClick={closeMenu} className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <img src={logo} alt="IISPP" className="h-10 w-auto shrink-0 sm:h-[58px]" />
+            <span className="min-w-0 max-w-[145px] border-l border-slate-200 pl-2 sm:max-w-[440px] sm:pl-4">
+              <span className="block font-display text-[11px] font-semibold leading-4 text-brand-900 sm:text-lg sm:leading-6">{BRAND.name}</span>
+              <span className="mt-1 block text-[10px] leading-3 text-slate-500 sm:text-sm sm:leading-5">{BRAND.parent}</span>
+            </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Main navigation">
-            {LINKS.map(([to, label]) => (
-              <NavLink key={to} to={to} className={linkClass}>{label}</NavLink>
-            ))}
-            <div className="group relative">
-              <button type="button" aria-haspopup="true" className={linkClass({ isActive: location.pathname.startsWith("/faculty") || location.pathname === "/centers" })}>
-                Departments <ChevronDown className="ml-1 inline h-4 w-4" />
-              </button>
-              <div className="invisible absolute right-0 top-full z-50 w-[320px] translate-y-2 rounded-xl border border-slate-200 bg-white p-4 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="max-h-[70vh] overflow-y-auto pr-1">
-                  <DepartmentGroups departments={departments} />
-                </div>
-              </div>
-            </div>
-          </nav>
-
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search the website" className="grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-brand-50 hover:text-brand-800">
-              <Search className="h-[18px] w-[18px]" />
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <button type="button" onClick={() => setSearchOpen(true)} aria-label={t("search")} className="grid h-9 w-9 place-items-center text-slate-700 transition hover:text-brand-700 sm:h-10 sm:w-10">
+              <Search className="h-5 w-5" />
             </button>
-            <button type="button" onClick={toggle} className="inline-flex h-10 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50" aria-label="Change language">
-              <Globe2 className="h-4 w-4" />{lang === "en" ? "ខ្មែរ" : "EN"}
+            <button type="button" onClick={toggle} className="inline-flex h-9 items-center gap-1 px-1 text-xs font-semibold text-slate-700 transition hover:text-brand-700 sm:h-10 sm:gap-2 sm:px-2 sm:text-sm" aria-label={lang === "en" ? t("switchToKhmer") : t("switchToEnglish")}>
+              <Globe2 className="h-4 w-4" /> <span className="sm:hidden">{lang === "en" ? "ខ្មែរ" : "EN"}</span><span className="hidden sm:inline">{lang === "en" ? "ខ្មែរ" : "English"}</span>
             </button>
-            <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label={menuOpen ? "Close menu" : "Open menu"} className="grid h-10 w-10 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 xl:hidden">
+            <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="mobile-navigation" aria-label={menuOpen ? t("closeMenu") : t("openMenu")} className="grid h-9 w-9 place-items-center text-slate-700 transition hover:text-brand-700 sm:h-10 sm:w-10 lg:hidden">
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {menuOpen && (
-          <nav className="border-t border-slate-100 bg-white px-4 py-3 shadow-lg xl:hidden" aria-label="Mobile navigation">
-            <div className="container-page grid grid-cols-2 gap-1 sm:grid-cols-3">
-              {LINKS.map(([to, label]) => (
-                <NavLink key={to} to={to} onClick={closeMenu} className={linkClass}>{label}</NavLink>
-              ))}
-              <div className="col-span-2 sm:col-span-3">
-                <button type="button" onClick={() => setDepartmentsOpen((open) => !open)} aria-expanded={departmentsOpen} className={linkClass({ isActive: departmentsOpen }) + " flex w-full items-center justify-between"}>
-                  Departments <ChevronDown className={`h-4 w-4 transition-transform ${departmentsOpen ? "rotate-180" : ""}`} />
-                </button>
-                {departmentsOpen && <div className="mt-2 rounded-xl border border-slate-200 bg-white p-3"><DepartmentGroups departments={departments} onNavigate={closeMenu} /></div>}
-              </div>
+        <div className="border-y border-slate-200 bg-white">
+          <nav className="container-page hidden items-center justify-between lg:flex" aria-label={t("mainNavigation")}>
+            <div className="flex items-center">
+              {direct.slice(0, 1).map((item) => <NavLink end key={item.to} to={item.to} className={desktopLink}>{item.label}</NavLink>)}
+              {groups.map((group) => <MenuGroup key={group.key} label={group.label} active={isActive(group.paths)} children={group.children} />)}
+              {direct.slice(1).map((item) => <NavLink key={item.to} to={item.to} className={desktopLink}>{item.label}</NavLink>)}
             </div>
+            <span className="hidden border-l border-gold-400 pl-4 text-xs font-medium text-slate-500 xl:block">{t("phnomPenhCambodia")}</span>
           </nav>
-        )}
+
+          {menuOpen && (
+            <nav id="mobile-navigation" className="max-h-[calc(100dvh-90px)] overflow-y-auto border-t border-slate-200 bg-white lg:hidden" aria-label={t("mainNavigation")}>
+              <div className="container-page py-2">
+                {direct.slice(0, 1).map((item) => <NavLink end key={item.to} to={item.to} onClick={closeMenu} className={({ isActive: current }) => `block border-b border-slate-200 px-3 py-3 text-sm font-semibold ${current ? activeClass : idleClass}`}>{item.label}</NavLink>)}
+                {groups.map((group) => <MenuGroup key={group.key} mobile label={group.label} active={isActive(group.paths)} children={group.children} onNavigate={closeMenu} />)}
+                {direct.slice(1).map((item) => <NavLink key={item.to} to={item.to} onClick={closeMenu} className={({ isActive: current }) => `block px-3 py-3 text-sm font-semibold ${current ? activeClass : idleClass}`}>{item.label}</NavLink>)}
+              </div>
+            </nav>
+          )}
+        </div>
       </header>
       {searchOpen && <SearchDialog onClose={() => setSearchOpen(false)} />}
     </>

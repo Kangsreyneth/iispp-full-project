@@ -9,9 +9,8 @@ export const NEWS_CATEGORIES = ["News", "Announcement", "Research", "Achievement
 
 /** Used until an admin saves their own values in Dashboard → Settings. */
 export const DEFAULT_SETTINGS = {
-  heroTitle: "Shaping leaders for a connected world",
-  heroSubtitle:
-    "Teaching, research and public engagement in international studies and public policy at the Royal University of Phnom Penh.",
+  heroTitle: "Institute for International Studies and Public Policy",
+  heroSubtitle: "Advancing knowledge, research and policy dialogue in Cambodia and beyond.",
   heroImage: "",
   aboutTitle: "About IISPP",
   aboutText:
@@ -19,6 +18,8 @@ export const DEFAULT_SETTINGS = {
   aboutImage: "",
   mission: "",
   vision: "",
+  goals: "",
+  background: "",
   stat1Value: "1960", stat1Label: "RUPP founded",
   stat2Value: "20,000+", stat2Label: "Students at RUPP",
   stat3Value: "", stat3Label: "",

@@ -1,222 +1,106 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  GraduationCap,
-  Newspaper,
-  BookOpen,
-  Pause,
-  Play,
-} from "lucide-react";
-
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useLang } from "@/hooks/useLang";
 import { useSettings } from "@/hooks/useSettings";
 import { BRAND } from "@/utils/constants";
-import iisppImage from "@/assets/images/IISPP1.png";
 import campusImage from "@/assets/images/campus.png";
-import studentImage from "@/assets/images/student.png";
+import iisppImage from "@/assets/images/IISPP1.png";
 import researchImage from "@/assets/images/research1.png";
 
-const AUTOPLAY_DELAY = 5000;
-
-const DEFAULT_SLIDES = [
-  {
-    image: iisppImage,
-    title: "Welcome to IISPP",
-    subtitle: "Discover learning and academic excellence.",
-  },
-  {
-    image: campusImage,
-    title: "Explore Our Campus",
-    subtitle: "Discover a vibrant learning environment.",
-  },
-  {
-    image: studentImage,
-    title: "Shape Your Future",
-    subtitle: "Explore academic programs and opportunities.",
-  },
-  {
-    image: researchImage,
-    title: "Research and Innovation",
-    subtitle: "Build knowledge through discovery.",
-  },
-];
+const defaultSlides = [campusImage, iisppImage, researchImage].map((image) => ({ image }));
 
 export default function Hero() {
   const { t } = useLang();
-  const { settings: s } = useSettings();
-
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  // Read banner slides from website settings.
+  const { settings } = useSettings();
   const configuredSlides = [
-    ...(s?.heroImage
-      ? [
-          {
-            image: s.heroImage,
-            title: s.heroTitle,
-            subtitle: s.heroSubtitle,
-          },
-        ]
-      : []),
-    ...(Array.isArray(s?.heroSlides) ? s.heroSlides : []),
+    ...(settings.heroImage ? [{ image: settings.heroImage }] : []),
+    ...(Array.isArray(settings.heroSlides) ? settings.heroSlides : []),
   ].filter((slide) => slide?.image);
-
-  // Use configured slides when there are at least two.
-  // Otherwise, use default banners for autoplay.
-  const slides =
-    configuredSlides.length >= 2
-      ? configuredSlides
-      : configuredSlides.length === 1
-        ? [configuredSlides[0], ...DEFAULT_SLIDES.slice(1)]
-        : DEFAULT_SLIDES;
-
-  const totalSlides = slides.length;
-  const currentSlide = slides[activeSlide] ?? slides[0];
+  const slides = configuredSlides.length ? configuredSlides : defaultSlides;
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const current = slides[active] || slides[0];
+  const title = current?.title || settings.heroTitle || BRAND.name;
+  const subtitle = current?.subtitle || settings.heroSubtitle || "Advancing knowledge, research and policy dialogue in Cambodia and beyond.";
 
   useEffect(() => {
-    setActiveSlide(0);
-  }, [totalSlides]);
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener?.("change", update);
+    return () => query.removeEventListener?.("change", update);
+  }, []);
 
-useEffect(() => {
-  if (totalSlides <= 1) return;
+  useEffect(() => {
+    setActive(0);
+  }, [slides.length]);
 
-  const timer = window.setInterval(() => {
-    setActiveSlide((current) => (current + 1) % totalSlides);
-  }, AUTOPLAY_DELAY);
+  useEffect(() => {
+    if (slides.length < 2 || paused || hovered || focused || reducedMotion) return undefined;
+    const timer = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 6500);
+    return () => window.clearInterval(timer);
+  }, [slides.length, paused, hovered, focused, reducedMotion]);
 
-  return () => window.clearInterval(timer);
-}, [totalSlides]);
-
-
-  const previousSlide = () => {
-    setActiveSlide((current) => (current - 1 + totalSlides) % totalSlides);
-  };
-
-  const nextSlide = () => {
-    setActiveSlide((current) => (current + 1) % totalSlides);
-  };
-
-  const quick = [
-    [GraduationCap, t("programs"), "/academics"],
-    [Newspaper, t("latestNews"), "/news"],
-    [BookOpen, t("apply"), "/admissions"],
-  ];
+  const move = (step) => setActive((value) => (value + step + slides.length) % slides.length);
 
   return (
     <section
-      className="relative isolate min-h-[560px] overflow-hidden bg-brand-950 text-white sm:min-h-[640px] lg:min-h-[700px]"
-      aria-label="IISPP banner"
-      // onMouseEnter={() => setPaused(true)}
-      // onMouseLeave={() => setPaused(false)}
-      // onFocusCapture={() => setPaused(true)}
-      // onBlurCapture={(event) => {
-      //   if (!event.currentTarget.contains(event.relatedTarget)) {
-      //     setPaused(false);
-      //   }
-      // }}
+      className="relative isolate flex min-h-[580px] items-center overflow-hidden bg-brand-950 text-white sm:min-h-[640px] lg:min-h-[690px]"
+      aria-label="IISPP introduction"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); }}
     >
-      {/* Banner images */}
-      {slides.map((slide, index) => (
-        <div
-          key={`${slide.image}-${index}`}
-          className={`absolute inset-0 z-0 transition-opacity duration-1000 ${
-            index === activeSlide ? "opacity-100" : "opacity-0"
-          }`}
-          aria-hidden="true"
-        >
-          <img
-            src={slide.image}
-            alt=""
-            className="h-full w-full object-cover object-center"
-            loading={index === 0 ? "eager" : "lazy"}
-            decoding="async"
-            onError={(event) => {
-              event.currentTarget.style.visibility = "hidden";
-            }}
-          />
-        </div>
-      ))}
+      <img
+        key={current.image}
+        src={current.image}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+        fetchPriority="high"
+        onError={(event) => { event.currentTarget.style.visibility = "hidden"; }}
+      />
+      <div className="absolute inset-0 bg-[#16050d]/65" aria-hidden="true" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#16050d]/50 via-transparent to-transparent" aria-hidden="true" />
 
-      {/* Dark overlays */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-r from-brand-950/90 via-brand-950/60 to-brand-950/20" />
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-950/70 via-transparent to-brand-950/10" />
-
-      {/* Main content */}
-      <div className="container-page relative z-20 flex min-h-[400px] flex-col justify-center py-12 sm:min-h-[460px] sm:py-16 lg:min-h-[520px] lg:py-20">
-        <div key={activeSlide} className="max-w-3xl animate-fade-up">
-          <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-gold-300 sm:text-sm">
+      <div className="container-page relative z-10 grid items-center gap-10 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.55fr)]">
+        <div className="max-w-4xl">
+          <p className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-gold-300 sm:text-sm">
             <span className="h-px w-10 bg-gold-400" />
             {BRAND.parent}
           </p>
-
-          <h1 className="max-w-3xl font-display text-4xl font-bold leading-tight sm:text-5xl lg:text-7xl">
-            {currentSlide?.title || s?.heroTitle || "Welcome to IISPP"}
+          <h1 className="max-w-4xl font-display text-4xl font-semibold leading-[1.12] sm:text-5xl lg:text-6xl xl:text-7xl">
+            {title}
           </h1>
-
-          <p className="mt-6 max-w-2xl text-base leading-8 text-white/85 sm:text-lg lg:text-xl">
-            {currentSlide?.subtitle ||
-              s?.heroSubtitle ||
-              "Discover learning and academic excellence."}
+          <p lang="km" className="mt-5 max-w-3xl font-sans text-xl font-semibold leading-relaxed text-gold-300 sm:text-2xl">
+            {t("heroKhmer")}
           </p>
-
+          <p className="mt-5 max-w-2xl text-base leading-8 text-white/90 sm:text-lg">
+            {subtitle}
+          </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button as={Link} to="/academics" variant="light" size="lg">
-              {t("exploreProgram")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-
-            <Button as={Link} to="/contact" variant="glass" size="lg">
-              {t("contactUs")}
-            </Button>
+            <Button as={Link} to="/academics" variant="light" size="lg">{t("exploreAcademics")} <ArrowRight className="h-4 w-4" /></Button>
+            <Button as={Link} to="/research" variant="glass" size="lg">{t("discoverResearch")}</Button>
           </div>
+        </div>
 
-          {/* Quick links */}
-          <div className="mt-10 grid max-w-2xl gap-3 sm:grid-cols-3">
-            {quick.map(([Icon, label, to]) => (
-              <Link
-                key={to}
-                to={to}
-                className="group flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-md transition hover:border-white/50 hover:bg-white hover:text-brand-900"
-              >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/15 transition group-hover:bg-brand-100">
-                  <Icon className="h-5 w-5" />
-                </span>
-
-                <span className="min-w-0 flex-1 text-sm font-semibold">
-                  {label}
-                </span>
-
-                <ArrowRight className="h-4 w-4 shrink-0 transition group-hover:translate-x-1" />
-              </Link>
-            ))}
-          </div>
+        <div className="hidden border-l border-white/35 pl-7 lg:block">
+          <p className="font-display text-2xl leading-snug text-white">{BRAND.name}</p>
+          <p className="mt-4 text-sm leading-6 text-white/75">{BRAND.parent}</p>
+          {slides.length > 1 && <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-gold-300">{String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}</p>}
         </div>
       </div>
 
-      {/* Slider controls */}
-
-      {/* Minimal centered slide indicators */}
-      {totalSlides > 1 && (
-        <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2">
-          {slides.map((slide, index) => (
-            <button
-              key={`${slide.image}-dot-${index}`}
-              type="button"
-              onClick={() => setActiveSlide(index)}
-              aria-label={`Go to banner ${index + 1}`}
-              aria-current={index === activeSlide ? "true" : undefined}
-              className={`h-2 rounded-full transition-all duration-500 ${
-                index === activeSlide
-                  ? "w-8 bg-white shadow-md"
-                  : "w-2 bg-white/60 hover:bg-white"
-              }`}
-            />
-          ))}
+      {slides.length > 1 && (
+        <div className="absolute bottom-5 right-5 z-20 flex items-center gap-2 sm:bottom-7 sm:right-8" aria-label="Banner controls">
+          <button type="button" onClick={() => move(-1)} className="grid h-10 w-10 place-items-center border border-white/50 text-white transition hover:bg-white hover:text-brand-900" aria-label={t("previousSlide")}><ChevronLeft className="h-5 w-5" /></button>
+          <button type="button" onClick={() => setPaused((value) => !value)} className="grid h-10 w-10 place-items-center border border-white/50 text-white transition hover:bg-white hover:text-brand-900" aria-label={paused ? t("playSlides") : t("pauseSlides")}>{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</button>
+          <button type="button" onClick={() => move(1)} className="grid h-10 w-10 place-items-center border border-white/50 text-white transition hover:bg-white hover:text-brand-900" aria-label={t("nextSlide")}><ChevronRight className="h-5 w-5" /></button>
         </div>
       )}
     </section>

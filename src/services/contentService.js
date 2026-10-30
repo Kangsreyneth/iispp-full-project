@@ -9,17 +9,19 @@ const RESOURCE = {
   pages: "pages",
 };
 
-const text = (value) => typeof value === "string" ? value : value?.en || value?.km || "";
+const text = (value, lang = "en") => typeof value === "string"
+  ? value
+  : value?.[lang] || value?.en || value?.km || "";
 const dateOnly = (value) => value ? String(value).slice(0, 10) : "";
 function localizedValue(value, existing, creating) {
   if (typeof value !== "string") return value;
-  if (!creating && existing && typeof existing === "object") return { en: value };
-  return { en: value, km: value };
+  if (!creating && existing && typeof existing === "object") return { ...existing, en: value };
+  return { en: value, km: "" };
 }
 const mediaUrl = (value) => typeof value === "string" ? value : value?.url || value?.downloadUrl || "";
 const mediaId = (value) => typeof value === "object" && value ? value.mediaId || value.id || "" : "";
 
-function mapItem(resource, item, isPublic = false) {
+function mapItem(resource, item, isPublic = false, lang = "en") {
   if (!item) return null;
   const image = resource === "pages" ? item.featuredImage : item.image;
   const id = isPublic && ["news", "programs", "pages"].includes(resource) ? item.slug || item.id : item.id;
@@ -27,44 +29,45 @@ function mapItem(resource, item, isPublic = false) {
 
   if (resource === "pages") return {
     ...common,
-    title: text(item.title),
-    excerpt: text(item.excerpt),
-    content: text(item.content),
+    title: text(item.title, lang),
+    excerpt: text(item.excerpt, lang),
+    content: text(item.content, lang),
   };
 
   if (resource === "news") return {
     ...common,
-    title: text(item.title),
-    excerpt: text(item.summary),
-    content: text(item.content),
+    title: text(item.title, lang),
+    excerpt: text(item.summary, lang),
+    content: text(item.content, lang),
+    category: text(item.category, lang),
     date: dateOnly(item.date || item.publishedAt || item.createdAt),
   };
   if (resource === "events") return {
     ...common,
-    title: text(item.title),
-    description: text(item.description),
+    title: text(item.title, lang),
+    description: text(item.description, lang),
     date: dateOnly(item.startAt || item.date),
     time: item.time || "",
-    location: text(item.location),
+    location: text(item.location, lang),
   };
   if (resource === "programs") return {
     ...common,
-    name: text(item.title),
-    title: text(item.title),
-    description: text(item.description),
+    name: text(item.title, lang),
+    title: text(item.title, lang),
+    description: text(item.description, lang),
   };
   if (resource === "departments") return {
     ...common,
-    name: text(item.name || item.title),
-    description: text(item.description),
+    name: text(item.name || item.title, lang),
+    description: text(item.description, lang),
   };
   if (resource === "research") return {
     ...common,
-    title: text(item.title),
-    abstract: text(item.abstract),
+    title: text(item.title, lang),
+    abstract: text(item.abstract, lang),
     publicationDate: dateOnly(item.publicationDate),
   };
-  return { ...common, title: text(item.title) };
+  return { ...common, title: text(item.title, lang) };
 }
 
 function payload(resource, values, creating = false, original = {}) {
@@ -121,7 +124,7 @@ function payload(resource, values, creating = false, original = {}) {
   return data;
 }
 
-async function list(resource, endpoint, max, isPublic) {
+async function list(resource, endpoint, max, isPublic, lang = "en") {
   const rows = [];
   let cursor = "";
   do {
@@ -130,7 +133,7 @@ async function list(resource, endpoint, max, isPublic) {
     const response = isPublic
       ? await publicApiFetch(`/public/${endpoint}?${query}`)
       : await apiFetch(`/admin/${endpoint}?${query}`);
-    rows.push(...(response?.data || []).map((item) => mapItem(resource, item, isPublic)));
+    rows.push(...(response?.data || []).map((item) => mapItem(resource, item, isPublic, lang)));
     cursor = response?.meta?.nextCursor || "";
   } while (cursor && rows.length < max);
   return rows.slice(0, max);
@@ -141,11 +144,11 @@ export function makeService(collection) {
   const resource = RESOURCE[collection] || collection;
   return {
     col: collection,
-    listPublished: (max = 100) => list(resource, resource, max, true),
+    listPublished: (max = 100, lang = "en") => list(resource, resource, max, true, lang),
     listAll: (max = 300) => list(resource, resource, max, false),
-    get: async (key) => {
+    get: async (key, lang = "en") => {
       const response = await publicApiFetch(`/public/${resource}/${encodeURIComponent(key)}`);
-      return mapItem(resource, response?.data, true);
+      return mapItem(resource, response?.data, true, lang);
     },
     create: (values) => apiFetch(`/admin/${resource}`, { method: "POST", body: JSON.stringify(payload(resource, values, true)) }),
     update: (id, values) => {

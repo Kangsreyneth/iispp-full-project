@@ -14,10 +14,11 @@ export default function About() {
       <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.3fr_1fr]">
         <div>
           <p className="prose-body text-lg">{s.aboutText}</p>
-          {(s.mission || s.vision) && (
-            <div className="mt-10 grid gap-5 sm:grid-cols-2">
-              {s.mission && <div className="rounded-xl border-t-4 border-brand-600 bg-brand-50 p-6"><h2 className="font-display text-2xl font-bold text-brand-800">Mission</h2><p className="prose-body mt-2 text-sm">{s.mission}</p></div>}
-              {s.vision && <div className="rounded-xl border-t-4 border-gold-500 bg-slate-50 p-6"><h2 className="font-display text-2xl font-bold text-brand-800">Vision</h2><p className="prose-body mt-2 text-sm">{s.vision}</p></div>}
+          {(s.mission || s.vision || s.goals) && (
+            <div className="mt-10 divide-y divide-slate-200 border-y border-slate-200">
+              {[[t("mission"), s.mission], [t("vision"), s.vision], [t("goals"), s.goals]].filter(([, value]) => value).map(([title, value]) => (
+                <section key={title} className="py-5"><h2 className="font-display text-xl font-semibold text-brand-800">{title}</h2><p className="prose-body mt-2 text-sm">{value}</p></section>
+              ))}
             </div>
           )}
         </div>

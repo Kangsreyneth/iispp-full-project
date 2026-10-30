@@ -2,7 +2,9 @@ export const toDate = (v) => (v?.toDate ? v.toDate() : v ? new Date(v) : null);
 
 export function formatDate(v, opts = { day: "numeric", month: "short", year: "numeric" }) {
   const d = toDate(v);
-  return d && !isNaN(d) ? d.toLocaleDateString("en-GB", opts) : "";
+  let locale = "en-GB";
+  try { if (localStorage.getItem("lang") === "km") locale = "km-KH"; } catch { /* use English when storage is unavailable */ }
+  return d && !isNaN(d) ? d.toLocaleDateString(locale, opts) : "";
 }
 export const dayOf = (v) => formatDate(v, { day: "2-digit" });
 export const monthOf = (v) => formatDate(v, { month: "short" });
