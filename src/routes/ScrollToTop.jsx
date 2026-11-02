@@ -6,18 +6,24 @@ export default function ScrollToTop() {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    if (hash) {
+    if (!hash) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      return undefined;
+    }
+
+    let tries = 0;
+    const timer = window.setInterval(() => {
       const target = document.getElementById(hash.slice(1));
+      tries += 1;
       if (target) {
         target.scrollIntoView({ block: "start" });
-        return;
+        window.clearInterval(timer);
+      } else if (tries > 20) {
+        window.clearInterval(timer);
       }
-    }
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
+    }, 50);
+
+    return () => window.clearInterval(timer);
   }, [pathname, hash]);
 
   return null;

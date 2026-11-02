@@ -24,6 +24,8 @@ async function listAll(max = 300) {
 const userService = {
   col: "users",
   listAll,
+  roles: async () => (await apiFetch("/admin/roles"))?.data || [],
+  invite: async (values) => normalize((await apiFetch("/admin/users", { method: "POST", body: JSON.stringify(values) }))?.data),
   count: async (status) => (await listAll(1000)).filter((user) => !status || user.status === status).length,
   update: async (uid, changes) => {
     let response;

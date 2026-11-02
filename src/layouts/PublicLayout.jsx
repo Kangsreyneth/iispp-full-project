@@ -8,7 +8,7 @@ export default function PublicLayout() {
     <div className="flex min-h-screen flex-col">
       <ConfigBanner />
       <Navbar />
-      <main className="flex-1 animate-fade-up"><Outlet /></main>
+      <main className="flex-1"><Outlet /></main>
       <Footer />
     </div>
   );

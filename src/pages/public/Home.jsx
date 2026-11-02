@@ -1,4 +1,4 @@
-import Hero from "./home/Hero";
+import BannerSlider from "./home/BannerSlider";
 import AboutSection from "./home/AboutSection";
 import DepartmentsSection from "./home/DepartmentsSection";
 import CentersSection from "./home/CentersSection";
@@ -18,7 +18,7 @@ export default function Home() {
   const programsState = useCollection(programService, { sort: byOrder });
   return (
     <>
-      <Hero />
+      <BannerSlider />
       <AboutSection />
       <DepartmentsSection />
       <CentersSection />

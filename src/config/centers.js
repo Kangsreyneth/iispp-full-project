@@ -1,14 +1,8 @@
-/** Center names already listed in the public navigation. */
+/** Center names supplied for the public directory. No detail content is configured yet. */
 export const CENTERS = [
-  "Information Technology Center",
-  "Library Service",
-  "Quality Assurance Center",
-  "English Language Support Unit",
-  "University-Industry Cooperation Center",
-  "Cambodia-Japan Cooperation Center",
-  "Cambodia-Korea Cooperation Center",
-  "National Incubation Center of Cambodia",
+  { slug: "center-of-southeast-asian-studies", name: "Center of Southeast Asian Studies" },
+  { slug: "cambodia-21st-century-maritime-silk-road-research-center", name: "Cambodia 21st Century Maritime Silk Road Research Center" },
+  { slug: "center-for-cambodia-studies", name: "Center for Cambodia Studies" },
 ];
 
-export const centerAnchor = (name) =>
-  name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export const centerBySlug = (slug) => CENTERS.find((center) => center.slug === slug);

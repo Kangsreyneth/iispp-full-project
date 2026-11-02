@@ -28,11 +28,11 @@ const dict = {
 
 Object.assign(dict.en, {
   research: "Research",
-  centersAndSupport: "Centers & academic support",
+  centersAndSupport: "IISPP Centers",
   viewCenters: "View all centers",
   viewDepartments: "View all departments",
   exploreCenter: "Explore center",
-  centersIntro: "Browse the centers and academic support units listed in the IISPP website.",
+  centersIntro: "Explore the centers listed by IISPP.",
   latestResearch: "Research highlights",
   readPublication: "Read publication",
   noDepartments: "No departments are available right now.",
@@ -67,14 +67,29 @@ Object.assign(dict.en, {
   noPrograms: "Programs will appear here when published.",
   breadcrumb: "Breadcrumb",
 });
-Object.assign(dict.en, { departments: "Departments" });
+Object.assign(dict.en, {
+  departments: "Departments",
+  centers: "Centers",
+  posts: "Posts",
+  postsUnavailable: "Posts are not configured as a separate content type yet. News remains available under News & Events.",
+  centerDetailsUnavailable: "Center details are not available yet.",
+  centerDetailsEmptyText: "No approved description, image, or contact information is available for this center yet.",
+  centerNotFound: "This center could not be found.",
+  academicPrograms: "Academic Programs",
+  existingPrograms: "Existing Programs",
+  academicCalendar: "Academic Calendar",
+  calendarUnavailable: "An academic calendar page is not available in the current website.",
+  aboutOurCenters: "About our centers",
+  background: "Background",
+  iisppHome: "IISPP home",
+});
 Object.assign(dict.km, {
   research: "ការស្រាវជ្រាវ",
-  centersAndSupport: "មជ្ឈមណ្ឌល និងសេវាគាំទ្រការសិក្សា",
+  centersAndSupport: "មជ្ឈមណ្ឌល IISPP",
   viewCenters: "មើលមជ្ឈមណ្ឌលទាំងអស់",
   viewDepartments: "មើលនាយកដ្ឋានទាំងអស់",
   exploreCenter: "ស្វែងយល់អំពីមជ្ឈមណ្ឌល",
-  centersIntro: "មើលបញ្ជីមជ្ឈមណ្ឌល និងអង្គភាពគាំទ្រការសិក្សាដែលមាននៅលើគេហទំព័រ IISPP។",
+  centersIntro: "ស្វែងយល់អំពីមជ្ឈមណ្ឌលដែលបានរាយបញ្ជីដោយ IISPP។",
   latestResearch: "ស្នាដៃស្រាវជ្រាវថ្មីៗ",
   readPublication: "អានឯកសារបោះពុម្ពផ្សាយ",
   noDepartments: "បច្ចុប្បន្នមិនមានព័ត៌មាននាយកដ្ឋានទេ។",
@@ -113,7 +128,22 @@ Object.assign(dict.km, {
   breadcrumb: "ទីតាំងនៅក្នុងគេហទំព័រ",
 });
 
-Object.assign(dict.km, { departments: "នាយកដ្ឋាន" });
+Object.assign(dict.km, {
+  departments: "នាយកដ្ឋាន",
+  centers: "មជ្ឈមណ្ឌល",
+  posts: "អត្ថបទ",
+  postsUnavailable: "មិនទាន់មានប្រភេទមាតិកាអត្ថបទដាច់ដោយឡែកនៅឡើយទេ។ ព័ត៌មាននៅតែមាននៅក្នុងផ្នែកព័ត៌មាន និងព្រឹត្តិការណ៍។",
+  centerDetailsUnavailable: "មិនទាន់មានព័ត៌មានលម្អិតអំពីមជ្ឈមណ្ឌលនេះនៅឡើយទេ។",
+  centerDetailsEmptyText: "មិនទាន់មានការពិពណ៌នា រូបភាព ឬព័ត៌មានទំនាក់ទំនងដែលបានអនុម័តសម្រាប់មជ្ឈមណ្ឌលនេះនៅឡើយទេ។",
+  centerNotFound: "រកមិនឃើញមជ្ឈមណ្ឌលនេះទេ។",
+  academicPrograms: "កម្មវិធីសិក្សា",
+  existingPrograms: "កម្មវិធីដែលមានស្រាប់",
+  academicCalendar: "ប្រតិទិនសិក្សា",
+  calendarUnavailable: "បច្ចុប្បន្នគេហទំព័រនេះមិនទាន់មានទំព័រប្រតិទិនសិក្សាទេ។",
+  aboutOurCenters: "អំពីមជ្ឈមណ្ឌលរបស់យើង",
+  background: "ប្រវត្តិ",
+  iisppHome: "ទំព័រដើម IISPP",
+});
 Object.assign(dict.en, {
   academicsIntro: "Explore undergraduate, graduate and short-course programs.",
   all: "All",

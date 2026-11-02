@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import Spinner from "@/components/ui/Spinner";
@@ -12,7 +13,14 @@ import { NEWS_CATEGORIES } from "@/utils/constants";
 
 export default function News() {
   const { t } = useLang();
-  const [cat, setCat] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const cat = searchParams.get("category") || "";
+  const setCat = (category) => setSearchParams((current) => {
+    const next = new URLSearchParams(current);
+    if (category) next.set("category", category);
+    else next.delete("category");
+    return next;
+  });
   const [q, setQ] = useState("");
   const { data, loading, error } = useCollection(newsService, { sort: byDateDesc });
   const shown = useMemo(

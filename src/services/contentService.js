@@ -7,6 +7,8 @@ const RESOURCE = {
   departments: "departments",
   faculties: "departments",
   pages: "pages",
+  research: "research",
+  publications: "publications",
 };
 
 const text = (value, lang = "en") => typeof value === "string"
@@ -26,48 +28,49 @@ function mapItem(resource, item, isPublic = false, lang = "en") {
   const image = resource === "pages" ? item.featuredImage : item.image;
   const id = isPublic && ["news", "programs", "pages"].includes(resource) ? item.slug || item.id : item.id;
   const common = { ...item, id, image: isPublic ? mediaUrl(image) : { url: mediaUrl(image), mediaId: mediaId(image) }, status: item.status || "published" };
+  const localizedField = (value) => isPublic ? text(value, lang) : value;
 
   if (resource === "pages") return {
     ...common,
-    title: text(item.title, lang),
-    excerpt: text(item.excerpt, lang),
-    content: text(item.content, lang),
+    title: localizedField(item.title),
+    excerpt: localizedField(item.excerpt),
+    content: localizedField(item.content),
   };
 
   if (resource === "news") return {
     ...common,
-    title: text(item.title, lang),
-    excerpt: text(item.summary, lang),
-    content: text(item.content, lang),
+    title: localizedField(item.title),
+    excerpt: localizedField(item.summary),
+    content: localizedField(item.content),
     category: text(item.category, lang),
     date: dateOnly(item.date || item.publishedAt || item.createdAt),
   };
   if (resource === "events") return {
     ...common,
-    title: text(item.title, lang),
-    description: text(item.description, lang),
+    title: localizedField(item.title),
+    description: localizedField(item.description),
     date: dateOnly(item.startAt || item.date),
     time: item.time || "",
-    location: text(item.location, lang),
+    location: localizedField(item.location),
   };
   if (resource === "programs") return {
     ...common,
-    name: text(item.title, lang),
-    title: text(item.title, lang),
-    description: text(item.description, lang),
+    name: localizedField(item.title),
+    title: localizedField(item.title),
+    description: localizedField(item.description),
   };
   if (resource === "departments") return {
     ...common,
-    name: text(item.name || item.title, lang),
-    description: text(item.description, lang),
+    name: localizedField(item.name || item.title),
+    description: localizedField(item.description),
   };
   if (resource === "research") return {
     ...common,
-    title: text(item.title, lang),
-    abstract: text(item.abstract, lang),
+    title: localizedField(item.title),
+    abstract: localizedField(item.abstract),
     publicationDate: dateOnly(item.publicationDate),
   };
-  return { ...common, title: text(item.title, lang) };
+  return { ...common, title: localizedField(item.title) };
 }
 
 function payload(resource, values, creating = false, original = {}) {

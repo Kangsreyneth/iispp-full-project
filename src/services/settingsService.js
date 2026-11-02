@@ -12,6 +12,8 @@ function toFormSettings(site = {}, location = {}, publicView = false, lang = "en
   const shownLocation = location.mapEnabled ? location : {};
   return {
     ...site,
+    logo: imageUrl(site.logo),
+    favicon: imageUrl(site.favicon),
     heroTitle: localized(site.heroTitle, lang),
     heroSubtitle: localized(site.heroSubtitle, lang),
     heroImage: imageUrl(site.heroImage),
@@ -43,7 +45,11 @@ async function loadAdmin() {
   ]);
   siteRecord = siteResponse?.data || {};
   locationRecord = locationResponse?.data || {};
-  return toFormSettings(siteRecord, locationRecord);
+  return {
+    ...toFormSettings(siteRecord, locationRecord),
+    siteName: siteRecord.siteName || { en: "IISPP", km: "" },
+    address: siteRecord.contact?.address || locationRecord.address || { en: "", km: "" },
+  };
 }
 
 export const settingsService = {
@@ -57,16 +63,18 @@ export const settingsService = {
 
   save: async (values) => {
     if (!siteRecord.siteName) await loadAdmin();
-    const { lat, lng, mapEnabled, address, phone, email, facebook, telegram, heroImage, aboutImage, ...siteFields } = values;
+    const { lat, lng, mapEnabled, address, phone, email, facebook, telegram, heroImage, aboutImage, logo, favicon, ...siteFields } = values;
     const site = {
       ...siteRecord,
       ...siteFields,
       heroImage: imageUrl(heroImage),
       aboutImage: imageUrl(aboutImage),
+      logo: logo?.mediaId ? { mediaId: logo.mediaId } : siteRecord.logo || null,
+      favicon: favicon?.mediaId ? { mediaId: favicon.mediaId } : siteRecord.favicon || null,
       siteName: { en: siteRecord.siteName?.en || "IISPP", km: siteRecord.siteName?.km || "" },
       defaultLanguage: siteRecord.defaultLanguage || "en",
       availableLanguages: siteRecord.availableLanguages || ["en", "km"],
-      contact: { ...(siteRecord.contact || {}), email, phone, address: { en: address || "", km: "" } },
+      contact: { ...(siteRecord.contact || {}), email, phone, address: typeof address === "object" ? address : { en: address || "", km: siteRecord.contact?.address?.km || "" } },
       socialLinks: { ...(siteRecord.socialLinks || {}), facebook: facebook || "", telegram: telegram || "" },
     };
     const location = {
@@ -75,7 +83,7 @@ export const settingsService = {
       longitude: lng === "" || lng == null ? null : Number(lng),
       googleMapsPlaceId: locationRecord.googleMapsPlaceId || null,
       directionsUrl: locationRecord.directionsUrl || null,
-      address: { en: address || "", km: "" },
+      address: typeof address === "object" ? address : { en: address || "", km: locationRecord.address?.km || "" },
       label: locationRecord.label || { en: "Our location", km: "" },
     };
     const [siteResponse, locationResponse] = await Promise.all([

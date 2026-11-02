@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 @theme {
   --font-sans: "Inter", "Noto Sans Khmer", system-ui, sans-serif;
@@ -26,7 +27,7 @@
   --color-gold-500: #a87d25;
 }
 
-html { scroll-behavior: smooth; text-size-adjust: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 4.25rem; text-size-adjust: 100%; }
 body { min-width: 320px; font-family: var(--font-sans); color: #263248; background: #f8f8f6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 button, input, textarea, select { font: inherit; }
 ::selection { color: #fff; background: var(--color-brand-700); }

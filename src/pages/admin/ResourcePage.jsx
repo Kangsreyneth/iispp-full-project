@@ -33,6 +33,8 @@ export default function ResourcePage({ resource }) {
   const [rows, setRows] = useState(null);
   const [editing, setEditing] = useState(null); // null = closed, {} = new, row = edit
   const [deleting, setDeleting] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const load = useCallback(async () => {
     try { setRows(await service.listAll()); }
@@ -61,6 +63,17 @@ export default function ResourcePage({ resource }) {
     } catch { toast.error("Could not delete"); }
   }
 
+  async function removeSelected() {
+    const results = await Promise.allSettled(selectedIds.map((id) => service.remove(id)));
+    const removed = results.filter((result) => result.status === "fulfilled").length;
+    const failed = results.length - removed;
+    if (removed) toast.success(`${removed} ${singular}${removed === 1 ? "" : "s"} deleted`);
+    if (failed) toast.error(`${failed} item${failed === 1 ? "" : "s"} could not be deleted`);
+    setSelectedIds([]);
+    setBulkDeleting(false);
+    await load();
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -76,6 +89,9 @@ export default function ResourcePage({ resource }) {
           columns={columns}
           rows={rows}
           searchKeys={searchKeys}
+          selectedIds={canDelete ? selectedIds : undefined}
+          onSelectionChange={canDelete ? setSelectedIds : undefined}
+          bulkAction={canDelete ? { label: "Delete selected", onClick: () => setBulkDeleting(true) } : undefined}
           emptyTitle={`No ${title.toLowerCase()} yet`}
           emptyText={`Click “Add ${singular}” to create the first one.`}
           actions={(row) => (
@@ -97,6 +113,7 @@ export default function ResourcePage({ resource }) {
       {deleting && (
         <ConfirmDialog title={`Delete this ${singular}?`} text={`“${deleting.title || deleting.name}” will be removed from the website. This cannot be undone.`} onConfirm={remove} onClose={() => setDeleting(null)} />
       )}
+      {bulkDeleting && <ConfirmDialog title={`Delete ${selectedIds.length} selected ${singular}${selectedIds.length === 1 ? "" : "s"}?`} text="This removes each selected record from the website. This cannot be undone." onConfirm={removeSelected} onClose={() => setBulkDeleting(false)} />}
     </div>
   );
 }
